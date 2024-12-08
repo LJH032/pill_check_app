@@ -1,8 +1,39 @@
 import 'package:flutter/material.dart';
-import 'option.dart'; // ThemeState를 가져오기 위해 import
+import 'package:shared_preferences/shared_preferences.dart';
+import 'entry_point.dart'; // ThemeState를 가져오기 위해 import
 
-class AccountSettingsPage extends StatelessWidget {
-  const AccountSettingsPage({super.key});
+class AccountSettingsPage extends StatefulWidget {
+  final String userId; // userId 필드 추가
+
+  const AccountSettingsPage({super.key, required this.userId}); // 생성자에서 userId를 받아옴
+
+  @override
+  _AccountSettingsPageState createState() => _AccountSettingsPageState();
+}
+
+class _AccountSettingsPageState extends State<AccountSettingsPage> {
+  bool isAutoLoginEnabled = false; // 계정 자동 로그인 설정 여부
+  bool isNotificationEnabled = false; // 알림 설정 여부
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings(); // 설정 값을 불러옴
+  }
+
+  Future<void> _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isAutoLoginEnabled = prefs.getBool('isAutoLoginEnabled') ?? false;
+      isNotificationEnabled = prefs.getBool('isNotificationEnabled') ?? false;
+    });
+  }
+
+  Future<void> _saveSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isAutoLoginEnabled', isAutoLoginEnabled);
+    await prefs.setBool('isNotificationEnabled', isNotificationEnabled);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +50,7 @@ class AccountSettingsPage extends StatelessWidget {
                   builder: (context, fontIndex, child) {
                     final fonts = ['Default', 'Serif', 'Monospace'];
                     return Text(
-                      'Pill check',
+                      'Pill Check',
                       style: TextStyle(
                         fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
                         fontWeight: FontWeight.bold,
@@ -65,7 +96,7 @@ class AccountSettingsPage extends StatelessWidget {
                             builder: (context, fontIndex, child) {
                               final fonts = ['Default', 'Serif', 'Monospace'];
                               return Text(
-                                '계정 설정',
+                                '계정 설정 (User ID: ${widget.userId})', // userId 표시
                                 style: TextStyle(
                                   fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
                                   fontSize: textSize,
@@ -84,29 +115,59 @@ class AccountSettingsPage extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile(
-                        title: Text(
-                          '계정 자동 로그인',
-                          style: TextStyle(
-                            fontSize: ThemeState.textSize.value,
-                            color: ThemeState.textColor.value,
-                          ),
+                        title: ValueListenableBuilder(
+                          valueListenable: ThemeState.textSize,
+                          builder: (context, textSize, child) {
+                            return ValueListenableBuilder(
+                              valueListenable: ThemeState.textColor,
+                              builder: (context, textColor, child) {
+                                return Text(
+                                  '계정 자동 로그인',
+                                  style: TextStyle(
+                                    fontSize: textSize,
+                                    color: textColor,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                         trailing: Switch(
-                          value: false, // UI만 구성
-                          onChanged: (value) {},
+                          value: isAutoLoginEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              isAutoLoginEnabled = value;
+                            });
+                            _saveSettings(); // 설정을 저장
+                          },
                         ),
                       ),
                       ListTile(
-                        title: Text(
-                          'Pill Check 알림 설정',
-                          style: TextStyle(
-                            fontSize: ThemeState.textSize.value,
-                            color: ThemeState.textColor.value,
-                          ),
+                        title: ValueListenableBuilder(
+                          valueListenable: ThemeState.textSize,
+                          builder: (context, textSize, child) {
+                            return ValueListenableBuilder(
+                              valueListenable: ThemeState.textColor,
+                              builder: (context, textColor, child) {
+                                return Text(
+                                  'Pill Check 알림 설정',
+                                  style: TextStyle(
+                                    fontSize: textSize,
+                                    color: textColor,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                         trailing: Switch(
-                          value: false, // UI만 구성
-                          onChanged: (value) {},
+                          value: isNotificationEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              isNotificationEnabled = value;
+                            });
+                            _saveSettings(); // 설정을 저장
+                          },
                         ),
                       ),
                       const Spacer(),
@@ -118,12 +179,22 @@ class AccountSettingsPage extends StatelessWidget {
                           backgroundColor: const Color(0xFFE9E9E9),
                           padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0),
                         ),
-                        child: Text(
-                          '로그아웃',
-                          style: TextStyle(
-                            fontSize: ThemeState.textSize.value,
-                            color: ThemeState.textColor.value,
-                          ),
+                        child: ValueListenableBuilder(
+                          valueListenable: ThemeState.textSize,
+                          builder: (context, textSize, child) {
+                            return ValueListenableBuilder(
+                              valueListenable: ThemeState.textColor,
+                              builder: (context, textColor, child) {
+                                return Text(
+                                  '로그아웃',
+                                  style: TextStyle(
+                                    fontSize: textSize,
+                                    color: textColor,
+                                  ),
+                                );
+                              },
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(height: 16),

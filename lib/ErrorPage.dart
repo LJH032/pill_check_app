@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
 import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 불러오기
-import 'mmain.dart'; // MainPage를 import
-import 'option.dart'; // SettingsPage를 import
+import 'main_home.dart'; // MainHomePage를 import
+import 'entry_point.dart'; // SettingsPage를 import
 
 class ErrorPage extends StatelessWidget {
-  const ErrorPage({super.key});
+  final String userId; // 사용자 ID 필드 추가
+
+  const ErrorPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +28,11 @@ class ErrorPage extends StatelessWidget {
                       appBar: CustomAppBar(
                         title: 'Pill Check',
                         onBackPressed: () {
-                          // 뒤로가기 버튼을 눌렀을 때 MainPage로 이동
+                          // 뒤로가기 버튼을 눌렀을 때 MainHomePage로 이동
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MainPage(),
+                              builder: (context) => MainHomePage(userId: userId), // userId 전달
                             ),
                           );
                         },
@@ -131,7 +133,7 @@ class ErrorPage extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                        const SettingsPage(),
+                                            SettingsPage(userId: userId), // userId 전달
                                       ),
                                     );
                                   },
@@ -144,7 +146,7 @@ class ErrorPage extends StatelessWidget {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                        const SettingsPage(),
+                                            SettingsPage(userId: userId), // userId 전달
                                       ),
                                     );
                                   },
@@ -167,11 +169,11 @@ class ErrorPage extends StatelessWidget {
                       ),
                       bottomNavigationBar: CustomBottomBar(
                         onHomePressed: () {
-                          // 하단 홈 버튼을 눌렀을 때 MainPage로 이동
+                          // 하단 홈 버튼을 눌렀을 때 MainHomePage로 이동
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const MainPage(),
+                              builder: (context) => MainHomePage(userId: userId), // userId 전달
                             ),
                           );
                         },

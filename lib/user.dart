@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
 import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 불러오기
-import 'option.dart'; // ThemeState를 가져오기 위해 import
+import 'entry_point.dart'; // ThemeState를 가져오기 위해 import
 
 class BlankPage extends StatelessWidget {
   const BlankPage({super.key});
@@ -52,35 +52,27 @@ class BlankPage extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Stack(
+                  child: ListView(
+                    padding: const EdgeInsets.all(16.0),
                     children: [
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 250,
-                        child: Image.asset(
-                          'assets/images/1.png',
-                          width: 300,
-                          height: 350,
-                          fit: BoxFit.contain,
-                          alignment: Alignment.center,
-                        ),
+                      Image.asset(
+                        'assets/images/1.png',
+                        width: 300,
+                        height: 350,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
                       ),
-                      ListView(
-                        padding: const EdgeInsets.all(16.0),
-                        children: [
-                          _buildTextContainer(
-                            '- Pill check의 현 버전은 1.0입니다.\n'
-                                '사진불러오기 권한허용 업데이트.\n'
-                                '카카오톡/구글 로그인을 업데이트 하였습니다.\n',
-                          ),
-                          const SizedBox(height: 16),
-                          _buildTextContainer(
-                            '- 12/26 version 업데이트 예정 (v1.3):\n'
-                                '알약 커뮤니티 기능 생성\n'
-                                '사용자 프로필 기능 생성',
-                          ),
-                        ],
+                      const SizedBox(height: 16),
+                      _buildTextContainer(
+                        '- Pill check의 현 버전은 1.0입니다.\n'
+                            '사진불러오기 권한허용 업데이트.\n'
+                            '카카오톡/구글 로그인을 업데이트 하였습니다.\n',
+                      ),
+                      const SizedBox(height: 16),
+                      _buildTextContainer(
+                        '- 12/26 version 업데이트 예정 (v1.3):\n'
+                            '알약 커뮤니티 기능 생성\n'
+                            '사용자 프로필 기능 생성',
                       ),
                     ],
                   ),

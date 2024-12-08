@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
 import 'custom_bottom_bar.dart'; // CustomBottomBar import
-import 'mmain.dart'; // MainPage import
+import 'main_home.dart'; // MainHomePage import
 
 class WifiDisconnectedPage extends StatelessWidget {
-  const WifiDisconnectedPage({super.key});
+  final String userId; // userId 필드 추가
+
+  const WifiDisconnectedPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +14,10 @@ class WifiDisconnectedPage extends StatelessWidget {
       appBar: CustomAppBar(
         title: 'Pill Check', // CustomAppBar에서 제목 설정
         onBackPressed: () {
-          // 뒤로 가기 버튼 동작: MainPage로 이동
+          // 뒤로 가기 버튼 동작: MainHomePage로 이동
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // userId 전달
           );
         },
       ),
@@ -61,13 +63,8 @@ class WifiDisconnectedPage extends StatelessWidget {
                 const SizedBox(height: 30),
                 ElevatedButton.icon(
                   onPressed: () {
-                    // 재시도 버튼 동작
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('현재 Wi-Fi 상태를 확인 중입니다...'),
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
+                    // 재시도 버튼 동작: 이전 페이지로 돌아가기
+                    Navigator.pop(context); // 이전 페이지로 돌아가기
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue.shade400,
@@ -92,10 +89,10 @@ class WifiDisconnectedPage extends StatelessWidget {
       ),
       bottomNavigationBar: CustomBottomBar(
         onHomePressed: () {
-          // 홈 버튼 동작: MainPage로 이동
+          // 홈 버튼 동작: MainHomePage로 이동
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainPage()),
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // userId 전달
           );
         },
       ),

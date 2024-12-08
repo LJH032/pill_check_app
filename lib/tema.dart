@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
 import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 불러오기
-import 'option.dart'; // ThemeState를 가져오기 위해 import
+import 'entry_point.dart'; // ThemeState를 가져오기 위해 import
 
 class ThemeSettingsPage extends StatefulWidget {
   const ThemeSettingsPage({super.key});

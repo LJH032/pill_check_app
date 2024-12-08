@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; // Kakao SDK import
 import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
 import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 불러오기
 import 'tema.dart'; // 테마 설정 페이지 import
-import 'user.dart';
-import 'mmain.dart';
-import 'ErrorPage.dart';
-import 'load.dart'; // LoadingPage
+import 'main_home.dart'; // MainHome import
 import 'AccountSettingsPage.dart';
-import 'wifi.dart';
-import 'home.dart';
+import 'login.dart';
 import 'result_page.dart';
 
 void main() {
+  KakaoSdk.init(
+    nativeAppKey: "baf21c9586cd52ac6c4211378fee4a17", // 카카오 네이티브 앱 키
+    loggingEnabled: true, // 디버그용 로깅 활성화
+  );
   runApp(const MyApp());
 }
 
@@ -23,7 +24,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Pill Check',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const MainPage(),
+      home: const LoginHomePage(), // 진입점을 LoginHomePage로 설정
     );
   }
 }
@@ -37,7 +38,8 @@ class ThemeState {
 }
 
 class SettingsPage extends StatelessWidget {
-  const SettingsPage({super.key});
+  final String userId;
+  const SettingsPage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class SettingsPage extends StatelessWidget {
         onBackPressed: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainPage()), // mmain.dart의 MainPage로 이동
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동
           );
         },
       ),
@@ -110,19 +112,7 @@ class SettingsPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => const AccountSettingsPage(), // AccountSettingsPage로 이동
-                            ),
-                          );
-                        },
-                      ),
-                      _buildSettingsTile(
-                        icon: Icons.update,
-                        title: '버전 및 업데이트 확인',
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const BlankPage(), // BlankPage로 이동
+                              builder: (context) => AccountSettingsPage(userId: userId), // AccountSettingsPage로 이동
                             ),
                           );
                         },
@@ -176,7 +166,7 @@ class SettingsPage extends StatelessWidget {
         onHomePressed: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const MainPage()), // mmain.dart의 MainPage로 이동
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동
           );
         },
       ),
