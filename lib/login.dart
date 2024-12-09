@@ -12,6 +12,7 @@ class LoginHomePage extends StatefulWidget {
   _LoginHomePageState createState() => _LoginHomePageState();
 }
 // 거의 다고침
+// 푸쉬가안되네
 class _LoginHomePageState extends State<LoginHomePage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(); // GoogleSignIn 인스턴스 생성
 
