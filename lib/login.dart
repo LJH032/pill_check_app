@@ -4,7 +4,7 @@ import 'package:flutter_web_auth/flutter_web_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'main_home.dart';
-
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart';
 class LoginHomePage extends StatefulWidget {
   const LoginHomePage({super.key});
 
@@ -84,70 +84,54 @@ class _LoginHomePageState extends State<LoginHomePage> {
     }
   }
 
-
-  // Kakao 로그인
   Future<void> _loginWithKakao() async {
-    final url =
-        'https://kauth.kakao.com/oauth/authorize?client_id=baf21c9586cd52ac6c4211378fee4a17&redirect_uri=kakao%3Abaf21c9586cd52ac6c4211378fee4a17%3A%2F%2Foauth&response_type=code';
-
     try {
-      print('Kakao OAuth 요청 URL: $url');
-      final result = await FlutterWebAuth.authenticate(
-        url: url,
-        callbackUrlScheme: 'kakaobaf21c9586cd52ac6c4211378fee4a17', // Kakao 스킴 설정
-      );
-      print('Kakao 인증 성공, 결과 URL: $result');
+      // 카카오톡 설치 여부 확인
+      print('카카오톡 설치 여부 확인 시작');
+      bool isKakaoInstalled = await isKakaoTalkInstalled();
+      print('카카오톡 설치 여부: $isKakaoInstalled'); // 카카오톡 설치 여부 확인
 
-      final code = Uri.parse(result).queryParameters['code'];
-      print('Kakao Authorization Code: $code');
+      // 카카오톡 앱 또는 카카오 계정 로그인 수행
+      print('카카오톡 앱 또는 카카오 계정 로그인 시도');
+      OAuthToken token = isKakaoInstalled
+          ? await UserApi.instance.loginWithKakaoTalk() // 카카오톡 앱으로 로그인
+          : await UserApi.instance.loginWithKakaoAccount(); // 카카오 계정으로 로그인
+      print('카카오톡 또는 카카오 계정 로그인 완료');
 
-      final response = await http.post(
-        Uri.parse('https://kauth.kakao.com/oauth/token'),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'grant_type': 'authorization_code',
-          'client_id': 'baf21c9586cd52ac6c4211378fee4a17',
-          'client_secret': 'c27aba5f2eb37186820b4b6fc9f864a5',
-          'redirect_uri': 'kakao%3Abaf21c9586cd52ac6c4211378fee4a17%3A%2F%2Foauth',
-          'code': code!,
-        },
-      );
+      if (token != null && token.accessToken != null) {
+        print('카카오 로그인 성공, 액세스 토큰: ${token.accessToken}');
 
-      if (response.statusCode == 200) {
-        print('Kakao OAuth 토큰 요청 성공: ${response.body}');
-        final responseBody = json.decode(response.body);
-        final accessToken = responseBody['access_token'];
-        print('Kakao Access Token: $accessToken');
+        // 사용자 정보 요청
+        print('사용자 정보 요청 시작');
+        User user = await UserApi.instance.me();
+        print('사용자 정보 요청 완료');
 
-        await _storeLoginInfoToDB(
-          userId: 'kakao_user', // 카카오 사용자 ID는 'kakao_user'로 설정
-          loginType: 'kakao',
-          accessToken: accessToken,
-          refreshToken: responseBody['refresh_token'],
-        );
+        String userId = user.id.toString();
+        String? email = user.kakaoAccount?.email; // 이메일 정보 가져오기
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kakao 로그인 성공!')),
-        );
+        print('사용자 정보: ID=$userId, 이메일=$email');
 
+        // 홈 페이지로 이동
+        print('홈 페이지로 이동');
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => MainHomePage(userId: 'kakao_user')), // MainHomePage로 이동
+            builder: (context) => MainHomePage(userId: userId),
+          ),
         );
       } else {
-        print('Kakao OAuth 토큰 요청 실패: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kakao 로그인 실패!')),
-        );
+        print('카카오 로그인 실패: 토큰이 유효하지 않음');
       }
     } catch (e) {
-      print('Kakao 인증 에러: $e');
+      print('로그인 중 오류 발생: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kakao 에러 발생: ${e.toString()}')),
+        SnackBar(content: Text('로그인 실패: ${e.toString()}')),
       );
     }
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
