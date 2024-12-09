@@ -28,51 +28,45 @@ class ErrorPage extends StatelessWidget {
                       appBar: CustomAppBar(
                         title: 'Pill Check',
                         onBackPressed: () {
-                          // 뒤로가기 버튼을 눌렀을 때 MainHomePage로 이동
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MainHomePage(userId: userId), // userId 전달
+                              builder: (context) => MainHomePage(userId: userId),
                             ),
                           );
                         },
                       ),
                       body: Stack(
                         children: [
-                          // 배경색 적용
                           Positioned.fill(
                             child: Container(
-                              color: backgroundColor, // ThemeState 배경색 적용
+                              color: backgroundColor, // 배경색
                             ),
                           ),
-                          // 중앙 UI 요소
                           Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                // 경고 아이콘
                                 Icon(
                                   Icons.error_outline,
                                   size: 80,
-                                  color: textColor, // ThemeState 텍스트 색상 적용
+                                  color: textColor,
                                 ),
                                 const SizedBox(height: 20),
-                                // 경고 메시지
                                 Text(
                                   '불러온 이미지가 부정확하거나\n검색 결과가 없습니다',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: textSize,
                                     fontWeight: FontWeight.bold,
-                                    color: textColor, // ThemeState 텍스트 색상 적용
+                                    color: textColor,
                                     fontFamily: fonts[fontIndex] == 'Default'
                                         ? null
                                         : fonts[fontIndex],
                                   ),
                                 ),
                                 const SizedBox(height: 30),
-                                // 사진 불러오기 버튼
                                 ElevatedButton.icon(
                                   onPressed: () {
                                     // 갤러리에서 사진 다시 불러오기 기능 (추후 구현)
@@ -100,13 +94,12 @@ class ErrorPage extends StatelessWidget {
                                   ),
                                 ),
                                 const SizedBox(height: 20),
-                                // 하단 안내 메시지
                                 Text(
                                   '흐릿하거나 멀리서 찍은 사진은\n구별하기 어려울 수 있어요!',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: textSize * 0.8,
-                                    color: textColor.withOpacity(0.6), // 흐린 텍스트
+                                    color: textColor.withOpacity(0.6),
                                     fontFamily: fonts[fontIndex] == 'Default'
                                         ? null
                                         : fonts[fontIndex],
@@ -115,38 +108,35 @@ class ErrorPage extends StatelessWidget {
                               ],
                             ),
                           ),
-                          // 왼쪽 아래에 설정 아이콘 및 텍스트 추가
                           Positioned(
-                            bottom: 30, // 하단바 위쪽 위치
-                            left: 20, // 화면 왼쪽에서 20px
+                            bottom: 30,
+                            left: 20,
                             child: Row(
                               children: [
                                 IconButton(
                                   icon: Icon(
                                     Icons.settings,
-                                    color: textColor.withOpacity(0.6), // 흐린 텍스트 색상
+                                    color: textColor.withOpacity(0.6),
                                     size: 40,
                                   ),
                                   onPressed: () {
-                                    // 설정 페이지로 이동
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            SettingsPage(userId: userId), // userId 전달
+                                            SettingsPage(userId: userId),
                                       ),
                                     );
                                   },
                                 ),
-                                const SizedBox(width: 8), // 아이콘과 텍스트 간격
+                                const SizedBox(width: 8),
                                 GestureDetector(
                                   onTap: () {
-                                    // 설정 페이지로 이동
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            SettingsPage(userId: userId), // userId 전달
+                                            SettingsPage(userId: userId),
                                       ),
                                     );
                                   },
@@ -169,11 +159,10 @@ class ErrorPage extends StatelessWidget {
                       ),
                       bottomNavigationBar: CustomBottomBar(
                         onHomePressed: () {
-                          // 하단 홈 버튼을 눌렀을 때 MainHomePage로 이동
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MainHomePage(userId: userId), // userId 전달
+                              builder: (context) => MainHomePage(userId: userId),
                             ),
                           );
                         },

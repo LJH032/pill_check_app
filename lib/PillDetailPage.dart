@@ -25,10 +25,11 @@ class PillDetailPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // 이미지 표시
               Center(
                 child: fullData['image'] != null
                     ? Image.memory(
-                  fullData['image'],
+                  fullData['image'], // fullData의 image를 Uint8List로 전달
                   width: 200,
                   height: 200,
                   fit: BoxFit.cover,
@@ -41,6 +42,7 @@ class PillDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
+              // 약 정보 표시
               _buildInfoBlock('이름', fullData['drug_name']),
               _buildInfoBlock('제형', fullData['formulation']),
               _buildInfoBlock('색상', fullData['color']),

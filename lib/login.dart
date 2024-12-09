@@ -15,6 +15,34 @@ class LoginHomePage extends StatefulWidget {
 class _LoginHomePageState extends State<LoginHomePage> {
   final GoogleSignIn _googleSignIn = GoogleSignIn(); // GoogleSignIn 인스턴스 생성
 
+  // 공통된 로그인 정보 DB 저장 함수
+  Future<void> _storeLoginInfoToDB({
+    required String userId,
+    required String loginType,
+    required String accessToken,
+    String? refreshToken,
+  }) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:5000/store-login-info'), // 서버의 로그인 정보 저장 API
+      headers: {
+        'Content-Type': 'application/json',  // 헤더에서 Content-Type을 'application/json'으로 설정
+      },
+      body: json.encode({
+        'user_id': userId,
+        'login_type': loginType,
+        'access_token': accessToken,
+        'refresh_token': refreshToken ?? '', // refreshToken이 null일 경우 빈 문자열로 처리
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('로그인 정보 DB 저장 성공');
+    } else {
+      print('로그인 정보 DB 저장 실패');
+    }
+  }
+
+  // Google 로그인
   Future<void> _loginWithGoogle() async {
     try {
       final GoogleSignInAccount? account = await _googleSignIn.signIn();
@@ -22,6 +50,17 @@ class _LoginHomePageState extends State<LoginHomePage> {
         print('Google Sign-In 성공! 사용자 이메일: ${account.email}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Google 로그인 성공: ${account.email}')),
+        );
+
+        final authentication = await account.authentication;
+        final accessToken = authentication.accessToken!;
+
+        // accessToken만 DB에 저장
+        await _storeLoginInfoToDB(
+          userId: account.email,
+          loginType: 'google',
+          accessToken: accessToken,
+          refreshToken: '',  // refreshToken을 사용할 수 없으면 빈 문자열로 설정
         );
 
         Navigator.pushReplacement(
@@ -44,10 +83,11 @@ class _LoginHomePageState extends State<LoginHomePage> {
     }
   }
 
+
+  // Kakao 로그인
   Future<void> _loginWithKakao() async {
     final url =
         'https://kauth.kakao.com/oauth/authorize?client_id=baf21c9586cd52ac6c4211378fee4a17&redirect_uri=kakao%3Abaf21c9586cd52ac6c4211378fee4a17%3A%2F%2Foauth&response_type=code';
-
 
     try {
       print('Kakao OAuth 요청 URL: $url');
@@ -78,6 +118,13 @@ class _LoginHomePageState extends State<LoginHomePage> {
         final accessToken = responseBody['access_token'];
         print('Kakao Access Token: $accessToken');
 
+        await _storeLoginInfoToDB(
+          userId: 'kakao_user', // 카카오 사용자 ID는 'kakao_user'로 설정
+          loginType: 'kakao',
+          accessToken: accessToken,
+          refreshToken: responseBody['refresh_token'],
+        );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Kakao 로그인 성공!')),
         );
@@ -85,7 +132,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-              builder: (context) => MainHomePage(userId: 'example_user_id')), // MainHomePage로 이동
+              builder: (context) => MainHomePage(userId: 'kakao_user')), // MainHomePage로 이동
         );
       } else {
         print('Kakao OAuth 토큰 요청 실패: ${response.body}');
@@ -106,9 +153,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
     return Scaffold(
       body: Stack(
         children: [
-          Container(
-            color: Colors.white,
-          ),
+          Container(color: Colors.white),
           Positioned(
             bottom: 190,
             left: 0,

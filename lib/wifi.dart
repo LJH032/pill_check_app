@@ -72,6 +72,9 @@ class WifiDisconnectedPage extends StatelessWidget {
                       horizontal: 40.0,
                       vertical: 16.0,
                     ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
                   icon: const Icon(Icons.refresh, color: Colors.white),
                   label: const Text(

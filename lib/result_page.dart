@@ -65,7 +65,7 @@ class ResultPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PillDetailPage(
-                          fullData: fullData,
+                          fullData: fullData, // 상세 정보를 전달
                           userId: userId, // PillDetailPage로 이동 시 userId 전달
                         ),
                       ),

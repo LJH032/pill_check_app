@@ -62,6 +62,25 @@ class AllowPage extends StatelessWidget {
     }
   }
 
+  Future<void> _checkAndRequestPermission(BuildContext context) async {
+    // 서버에서 현재 권한 상태 조회
+    var response = await http.get(Uri.parse('http://127.0.0.1:5000/get_permission/$userId'));
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      if (data['image_permission'] == 1) {
+        // 권한이 이미 허용된 경우 바로 이미지 선택 페이지로 이동
+        Navigator.pop(context); // 현재 페이지 닫기
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이미지 접근 권한이 이미 허용되었습니다.')),
+        );
+      } else {
+        // 권한이 없으면 권한 요청
+        await _requestPermission(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -86,7 +105,7 @@ class AllowPage extends StatelessWidget {
         TextButton(
           onPressed: () async {
             Navigator.pop(context); // 팝업 닫기
-            await _requestPermission(context); // 권한 요청 및 이미지 선택 함수 호출
+            await _checkAndRequestPermission(context); // 권한 상태 확인 및 요청 함수 호출
           },
           child: const Text(
             '허용',

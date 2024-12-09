@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io'; // File class import
-import 'dart:typed_data'; // Uint8List import
 import 'main_home.dart'; // MainHomePage import 추가
 import 'result_page.dart'; // ResultPage import 추가
 
@@ -71,8 +70,23 @@ class _LoadingPageState extends State<LoadingPage> {
       appBar: AppBar(
         title: const Text('Pill Check'),
       ),
-      body: const Center(
-        child: CircularProgressIndicator(), // 로딩 애니메이션 표시
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(), // 로딩 애니메이션 표시
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _uploadAndAnalyzeImage(), // 업로드 및 분석 재시도
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // 버튼 색상
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              child: const Text('Retry Upload'), // 버튼 텍스트
+            ),
+          ],
+        ),
       ),
     );
   }
