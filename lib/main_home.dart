@@ -22,25 +22,32 @@ class _MainHomePageState extends State<MainHomePage> {
 
   // 권한 상태를 확인하고, 갤러리 접근을 시도하는 메소드
   Future<void> _checkPermission(BuildContext context) async {
-    var response = await http.get(Uri.parse('http://10.0.2.2:5000/get_permission/${widget.userId}'));
+    try {
+      var response = await http.get(Uri.parse('http://10.0.2.2:5000/get_permission/${widget.userId}'));
 
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      if (data['image_permission'] == 1) {
-        setState(() {
-          _permissionStatus = '권한 허용됨';
-        });
-        _accessGallery();
-        return;
+      if (response.statusCode == 200) {
+        var data = json.decode(response.body);
+        if (data['image_permission'] == 1) {
+          setState(() {
+            _permissionStatus = '권한 허용됨';
+          });
+          _accessGallery();
+          return;
+        }
       }
+
+      setState(() {
+        _permissionStatus = '권한이 없으므로 요청합니다';
+      });
+
+      // 권한이 허용되지 않았거나 조회 실패 시 갤러리 접근 권한 요청
+      _requestPermission(context);
+    } catch (e) {
+      setState(() {
+        _permissionStatus = '권한 상태 확인 실패: ${e.toString()}';
+      });
+      print('Error: $e');
     }
-
-    setState(() {
-      _permissionStatus = '권한이 없으므로 요청합니다';
-    });
-
-    // 권한이 허용되지 않았거나 조회 실패 시 갤러리 접근 권한 요청
-    _requestPermission(context);
   }
 
   // 권한을 요청하고, 권한 허용 시 데이터베이스 업데이트 및 갤러리 접근

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 import
-import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 import
-import 'main_home.dart'; // MainHomePage import 추가
-import 'PillDetailPage.dart'; // PillDetailPage import
-import 'dart:typed_data'; // Uint8List import
-import 'dart:io'; // File class import 추가
+import 'custom_app_bar.dart';
+import 'custom_bottom_bar.dart';
+import 'main_home.dart';
+import 'PillDetailPage.dart';
+import 'dart:typed_data';
+import 'dart:io';
 
 class ResultPage extends StatelessWidget {
   final File imageFile;
@@ -12,8 +12,9 @@ class ResultPage extends StatelessWidget {
   final String formulation;
   final String color;
   final String efficacy;
-  final Map<String, dynamic> fullData; // 상세 정보를 모두 전달
-  final String userId; // userId 필드 추가
+  final Map<String, dynamic> fullData;
+  final double confidence;
+  final String userId;
 
   const ResultPage({
     super.key,
@@ -23,34 +24,54 @@ class ResultPage extends StatelessWidget {
     required this.color,
     required this.efficacy,
     required this.fullData,
-    required this.userId, // userId 추가
+    required this.confidence,
+    required this.userId,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: '인식결과', // CustomAppBar에서 제목 설정
+        title: '인식결과',
         onBackPressed: () {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동 시 userId 전달
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)),
                 (route) => false,
           );
         },
       ),
       body: SingleChildScrollView(
         child: Container(
-          color: Colors.white, // 흰색 배경 설정
+          color: Colors.white,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.file(
-                imageFile,
-                width: 200,
-                height: 200,
-                fit: BoxFit.cover,
+              Row(
+                children: [
+                  // 이미지 표시
+                  Image.file(
+                    imageFile,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 16),
+                  // 신뢰도 표시
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '신뢰도: ${confidence.toStringAsFixed(2)}%',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
               _buildInfoBlock('이름', drugName),
@@ -65,8 +86,9 @@ class ResultPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(
                         builder: (context) => PillDetailPage(
-                          fullData: fullData, // 상세 정보를 전달
-                          userId: userId, // PillDetailPage로 이동 시 userId 전달
+                          fullData: fullData,
+                          userId: userId,
+                          confidence: confidence,
                         ),
                       ),
                     );
@@ -82,7 +104,7 @@ class ResultPage extends StatelessWidget {
         onHomePressed: () {
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동 시 userId 전달
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)),
                 (route) => false,
           );
         },

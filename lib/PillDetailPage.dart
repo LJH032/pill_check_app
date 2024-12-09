@@ -1,77 +1,110 @@
+import 'dart:typed_data';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'main_home.dart'; // MainHomePage import 추가
-import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 import
-import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 import
+import 'package:http/http.dart' as http;
 
-class PillDetailPage extends StatelessWidget {
-  final Map<String, dynamic> fullData; // 상세 정보 데이터를 전달받음
-  final String userId; // 사용자 ID를 받아옴
+class PillDetailPage extends StatefulWidget {
+  final Map<String, dynamic> fullData;
+  final String userId;
+  final double confidence;  // 신뢰도 추가
 
-  const PillDetailPage({super.key, required this.fullData, required this.userId});
+  const PillDetailPage({
+    super.key,
+    required this.fullData,
+    required this.userId,
+    required this.confidence,  // 신뢰도 추가
+  });
+
+  @override
+  _PillDetailPageState createState() => _PillDetailPageState();
+}
+
+class _PillDetailPageState extends State<PillDetailPage> {
+  Uint8List? imageBytes;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadImage();  // 서버에서 이미지 불러오기
+  }
+
+  Future<void> _loadImage() async {
+    var response = await http.get(Uri.parse('http://10.0.2.2:5000/predict'));
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      String base64Image = data['image'];
+
+      setState(() {
+        imageBytes = base64Decode(base64Image);
+      });
+    } else {
+      print('Failed to load image');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(
-        title: '상세 정보', // CustomAppBar에서 제목 설정
-        onBackPressed: () {
-          Navigator.pop(context); // 이전 화면으로 이동
-        },
-      ),
+      appBar: AppBar(title: Text('Pill Details')),
       body: SingleChildScrollView(
         child: Container(
-          color: Colors.white, // 흰색 배경 설정
+          color: Colors.white,
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 이미지 표시
-              Center(
-                child: fullData['image'] != null
-                    ? Image.memory(
-                  fullData['image'], // fullData의 image를 Uint8List로 전달
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.cover,
-                )
-                    : Image.asset(
-                  'assets/images/2.png', // 기본 이미지 사용
-                  width: 200,
-                  height: 200,
-                  fit: BoxFit.cover,
-                ),
+              Row(
+                children: [
+                  // 이미지 표시
+                  imageBytes != null
+                      ? Image.memory(
+                    imageBytes!,
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  )
+                      : Image.asset(
+                    'assets/images/2.png',
+                    width: 100,
+                    height: 100,
+                    fit: BoxFit.cover,
+                  ),
+                  const SizedBox(width: 16),
+                  // 신뢰도 표시
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '신뢰도: ${widget.confidence.toStringAsFixed(2)}%',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
               const SizedBox(height: 24),
-              // 약 정보 표시
-              _buildInfoBlock('이름', fullData['drug_name']),
-              _buildInfoBlock('제형', fullData['formulation']),
-              _buildInfoBlock('색상', fullData['color']),
-              _buildInfoBlock('효능', fullData['efficacy']),
-              _buildInfoBlock('분할선', fullData['Separating_Line']),
-              _buildInfoBlock('사용 방법', fullData['usage_method']),
-              _buildInfoBlock('주의사항', fullData['warning']),
-              _buildInfoBlock('주의사항(기타)', fullData['precautions']),
-              _buildInfoBlock('상호작용', fullData['interactions']),
-              _buildInfoBlock('부작용', fullData['side_effects']),
-              _buildInfoBlock('저장 방법', fullData['storage_method']),
+              _buildInfoBlock('이름', widget.fullData['drug_name']),
+              _buildInfoBlock('제형', widget.fullData['formulation']),
+              _buildInfoBlock('색상', widget.fullData['color']),
+              _buildInfoBlock('효능', widget.fullData['efficacy']),
+              _buildInfoBlock('분할선', widget.fullData['Separating_Line']),
+              _buildInfoBlock('사용 방법', widget.fullData['usage_method']),
+              _buildInfoBlock('주의사항', widget.fullData['warning']),
+              _buildInfoBlock('주의사항(기타)', widget.fullData['precautions']),
+              _buildInfoBlock('상호작용', widget.fullData['interactions']),
+              _buildInfoBlock('부작용', widget.fullData['side_effects']),
+              _buildInfoBlock('저장 방법', widget.fullData['storage_method']),
               const SizedBox(height: 24),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: CustomBottomBar(
-        onHomePressed: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동 시 userId 전달
-                (route) => false,
-          );
-        },
-      ),
     );
   }
 
-  // 블록 빌드 함수
   Widget _buildInfoBlock(String title, String content) {
     return Container(
       width: double.infinity,
