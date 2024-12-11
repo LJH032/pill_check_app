@@ -72,7 +72,7 @@ class _LoadingPageState extends State<LoadingPage> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // 뒤로가기 눌렀을 때 MainHomePage로 이동
+        // 뒤로가기 눌렀을 때 MainHomePage로 이
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
