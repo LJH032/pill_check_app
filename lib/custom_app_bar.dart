@@ -28,7 +28,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: const Icon(Icons.arrow_back, color: Colors.black),
         onPressed: onBackPressed,
       )
-          : null,
+          : null, // onBackPressed가 null이면 leading을 표시하지 않음
     );
   }
 

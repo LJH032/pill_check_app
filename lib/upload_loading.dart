@@ -70,26 +70,46 @@ class _LoadingPageState extends State<LoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pill Check'),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const CircularProgressIndicator(), // 로딩 애니메이션 표시
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _uploadAndAnalyzeImage(), // 업로드 및 분석 재시도
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green, // 버튼 색상
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+    return WillPopScope(
+      onWillPop: () async {
+        // 뒤로가기 눌렀을 때 MainHomePage로 이동
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+        );
+        return false; // 기본 뒤로가기 동작 방지
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Pill Check'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              // 뒤로가기 버튼 눌렀을 때 MainHomePage로 이동
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+              );
+            },
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(), // 로딩 애니메이션 표시
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => _uploadAndAnalyzeImage(), // 업로드 및 분석 재시도
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green, // 버튼 색상
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                child: const Text('Retry Upload'), // 버튼 텍스트
               ),
-              child: const Text('Retry Upload'), // 버튼 텍스트
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
