@@ -7,6 +7,8 @@ import 'upload_loading.dart';
 import 'allow.dart';
 import 'custom_bottom_bar.dart';
 import 'setting.dart';
+import 'setting_dart.dart';
+import 'entry_point.dart'; // ThemeState를 사용하기 위해 import
 
 class MainHomePage extends StatefulWidget {
   final String userId;
@@ -95,109 +97,149 @@ class _MainHomePageState extends State<MainHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async => false, // 시스템 뒤로가기 버튼 무시
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Pill Check',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 20.0,
-            ),
-          ),
-          backgroundColor: const Color(0xFFE9E9E9),
-          centerTitle: true,
-          elevation: 0,
-          automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
-        ),
-        backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/1.png',
-                    height: 300,
-                    width: 300,
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    _permissionStatus ?? '사진 불러오기를 통해 \n알약을 인식해보세요!',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  _imagePath != null
-                      ? Column(
-                    children: [
-                      Image.file(
-                        File(_imagePath!),
-                        height: 200,
-                        width: 200,
-                        fit: BoxFit.cover,
+    return ValueListenableBuilder(
+      valueListenable: ThemeState.backgroundColor,
+      builder: (context, backgroundColor, child) {
+        return ValueListenableBuilder(
+          valueListenable: ThemeState.textColor,
+          builder: (context, textColor, child) {
+            return ValueListenableBuilder(
+              valueListenable: ThemeState.textSize,
+              builder: (context, textSize, child) {
+                return ValueListenableBuilder(
+                  valueListenable: ThemeState.fontIndex,
+                  builder: (context, fontIndex, child) {
+                    final fonts = ['Default', 'Serif', 'Monospace'];
+                    return WillPopScope(
+                      onWillPop: () async => false, // 시스템 뒤로가기 버튼 무시
+                      child: Scaffold(
+                        appBar: AppBar(
+                          title: Text(
+                            'Pill Check',
+                            style: TextStyle(
+                              fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                              fontSize: textSize,
+                            ),
+                          ),
+                          backgroundColor: const Color(0xFFE9E9E9),
+                          centerTitle: true,
+                          elevation: 0,
+                          automaticallyImplyLeading: false, // 뒤로가기 버튼 제거
+                        ),
+                        backgroundColor: backgroundColor,
+                        body: Stack(
+                          children: [
+                            Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/images/1.png',
+                                    height: 300,
+                                    width: 300,
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    _permissionStatus ?? '사진 불러오기를 통해 \n알약을 인식해보세요!',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: textSize,
+                                      fontWeight: FontWeight.bold,
+                                      color: textColor,
+                                      fontFamily: fonts[fontIndex] == 'Default'
+                                          ? null
+                                          : fonts[fontIndex],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  _imagePath != null
+                                      ? Column(
+                                    children: [
+                                      Image.file(
+                                        File(_imagePath!),
+                                        height: 200,
+                                        width: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        '선택된 이미지',
+                                        style: TextStyle(fontSize: textSize, color: textColor),
+                                      ),
+                                    ],
+                                  )
+                                      : Text(
+                                    '알약이 아닌 사진은 인식을 못할 수 있습니다.',
+                                    style: TextStyle(fontSize: 17, color: textColor),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  ElevatedButton.icon(
+                                    onPressed: () => _checkPermission(context),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF80CBC4),
+                                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                                      minimumSize: const Size(150, 50),
+                                      textStyle: TextStyle(
+                                        fontSize: textSize,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: fonts[fontIndex] == 'Default'
+                                            ? null
+                                            : fonts[fontIndex],
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(32),
+                                      ),
+                                    ),
+                                    icon: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Colors.black,
+                                      size: 24,
+                                    ),
+                                    label: Text(
+                                      '사진 불러오기',
+                                      style: TextStyle(color: Colors.black, fontSize: textSize),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Positioned(
+                              bottom: 13,
+                              left: 16,
+                              child: IconButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          SettingPage1(userId: widget.userId), // SettingsPage로 이동
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(
+                                  Icons.settings,
+                                  size: 40,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        bottomNavigationBar: CustomBottomBar(
+                          onHomePressed: () {},
+                        ),
                       ),
-                      const SizedBox(height: 10),
-                      const Text('선택된 이미지', style: TextStyle(fontSize: 18)),
-                    ],
-                  )
-                      : const Text(
-                    '알약이 아닌 사진은 인식을 못할 수 있습니다.',
-                    style: TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton.icon(
-                    onPressed: () => _checkPermission(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF80CBC4),
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
-                      minimumSize: const Size(150, 50),
-                      textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(32),
-                      ),
-                    ),
-                    icon: const Icon(
-                      Icons.camera_alt_outlined,
-                      color: Colors.black,
-                      size: 24,
-                    ),
-                    label: const Text(
-                      '사진 불러오기',
-                      style: TextStyle(color: Colors.black),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 13,
-              left: 16,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsPage(userId: widget.userId), // SettingsPage로 이동
-                    ),
-                  );
-                },
-                icon: const Icon(
-                  Icons.settings,
-                  size: 40,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-          ],
-        ),
-        bottomNavigationBar: CustomBottomBar(
-          onHomePressed: () {},
-        ),
-      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 }

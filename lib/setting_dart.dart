@@ -1,45 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:kakao_flutter_sdk/kakao_flutter_sdk.dart'; // Kakao SDK import
-import 'custom_app_bar.dart'; // CustomAppBar 컴포넌트 불러오기
-import 'custom_bottom_bar.dart'; // CustomBottomBar 컴포넌트 불러오기
-import 'tema.dart'; // 테마 설정 페이지 import
-import 'main_home.dart'; // MainHome import
+import 'custom_app_bar.dart';
+import 'custom_bottom_bar.dart';
 import 'AccountSettingsPage.dart';
-import 'login.dart';
-import 'result_page.dart';
+import 'tema.dart';
+import 'main_home.dart';
+import 'entry_point.dart';
+import 'user.dart';
 
-void main() {
-  KakaoSdk.init(
-    nativeAppKey: "baf21c9586cd52ac6c4211378fee4a17", // 카카오 네이티브 앱 키
-    loggingEnabled: true, // 디버그용 로깅 활성화
-  );
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pill Check',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginHomePage(), // 진입점을 LoginHomePage로 설정
-    );
-  }
-}
-
-// 전역 상태 관리
-class ThemeState {
-  static ValueNotifier<Color> backgroundColor = ValueNotifier<Color>(Colors.white);
-  static ValueNotifier<Color> textColor = ValueNotifier<Color>(Colors.black);
-  static ValueNotifier<double> textSize = ValueNotifier<double>(16.0); // 글씨 크기 초기값
-  static ValueNotifier<int> fontIndex = ValueNotifier<int>(0); // 폰트 인덱스 상태
-}
-
-class SettingsPage extends StatelessWidget {
+class SettingPage1 extends StatelessWidget {
   final String userId;
-  const SettingsPage({super.key, required this.userId});
+
+  const SettingPage1({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +25,6 @@ class SettingsPage extends StatelessWidget {
         },
       ),
       body: ValueListenableBuilder(
-
         valueListenable: ThemeState.backgroundColor,
         builder: (context, backgroundColor, child) {
           return Container(
@@ -78,7 +48,9 @@ class SettingsPage extends StatelessWidget {
                               return Text(
                                 '설정',
                                 style: TextStyle(
-                                  fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
+                                  fontFamily: fonts[fontIndex] == 'Default'
+                                      ? null
+                                      : fonts[fontIndex],
                                   fontSize: textSize,
                                   fontWeight: FontWeight.bold,
                                   color: textColor,
@@ -113,7 +85,19 @@ class SettingsPage extends StatelessWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AccountSettingsPage(userId: userId), // AccountSettingsPage로 이동
+                              builder: (context) => AccountSettingsPage(userId: userId),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildSettingsTile(
+                        icon: Icons.update,
+                        title: '업데이트 확인',
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const BlankPage(), // BlankPage로 이동
                             ),
                           );
                         },
@@ -122,9 +106,9 @@ class SettingsPage extends StatelessWidget {
                         padding: const EdgeInsets.all(16.0),
                         child: Center(
                           child: Image.asset(
-                            'assets/images/1.png', // 이미지 경로
-                            width: 300, // 이미지 너비
-                            height: 300, // 이미지 높이
+                            'assets/images/1.png',
+                            width: 300,
+                            height: 300,
                           ),
                         ),
                       ),
@@ -146,7 +130,9 @@ class SettingsPage extends StatelessWidget {
                               child: Text(
                                 'version 1.0',
                                 style: TextStyle(
-                                  fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
+                                  fontFamily: fonts[fontIndex] == 'Default'
+                                      ? null
+                                      : fonts[fontIndex],
                                   color: textColor,
                                   fontSize: textSize * 0.8,
                                 ),
@@ -167,7 +153,7 @@ class SettingsPage extends StatelessWidget {
         onHomePressed: () {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)), // MainHomePage로 이동
+            MaterialPageRoute(builder: (context) => MainHomePage(userId: userId)),
           );
         },
       ),
@@ -208,7 +194,9 @@ class SettingsPage extends StatelessWidget {
                     title: Text(
                       title,
                       style: TextStyle(
-                        fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
+                        fontFamily: fonts[fontIndex] == 'Default'
+                            ? null
+                            : fonts[fontIndex],
                         fontSize: textSize,
                         fontWeight: FontWeight.bold,
                         color: buttonTextColor,

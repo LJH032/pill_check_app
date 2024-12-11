@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'main_home.dart'; // MainHomePage import
 import 'entry_point.dart'; // ThemeState를 가져오기 위해 import
 
 class AccountSettingsPage extends StatefulWidget {
@@ -247,7 +248,13 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           child: IconButton(
             icon: const Icon(Icons.home, size: 30, color: Colors.black),
             onPressed: () {
-              Navigator.popUntil(context, ModalRoute.withName('/')); // 홈으로 이동
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MainHomePage(userId: widget.userId),
+                ),
+                    (route) => false, // 이전 모든 페이지 제거
+              );
             },
           ),
         ),

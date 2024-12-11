@@ -38,7 +38,9 @@ class BlankPage extends StatelessWidget {
                               return Text(
                                 '버전 및 업데이트 확인',
                                 style: TextStyle(
-                                  fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
+                                  fontFamily: fonts[fontIndex] == 'Default'
+                                      ? null
+                                      : fonts[fontIndex],
                                   fontSize: textSize,
                                   fontWeight: FontWeight.bold,
                                   color: textColor,
@@ -121,7 +123,7 @@ class BlankPage extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.8),
+                color: ThemeState.backgroundColor.value.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Text(

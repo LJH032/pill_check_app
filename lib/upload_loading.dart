@@ -4,6 +4,9 @@ import 'dart:convert';
 import 'dart:io'; // File class import
 import 'main_home.dart'; // MainHomePage import 추가
 import 'result_page.dart'; // ResultPage import 추가
+import 'custom_app_bar.dart'; // CustomAppBar import 추가
+import 'custom_bottom_bar.dart'; // CustomBottomBar import 추가
+import 'entry_point.dart'; // ThemeState import
 
 class LoadingPage extends StatefulWidget {
   final File imageFile;
@@ -70,48 +73,79 @@ class _LoadingPageState extends State<LoadingPage> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        // 뒤로가기 눌렀을 때 MainHomePage로 이
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+    return ValueListenableBuilder(
+      valueListenable: ThemeState.backgroundColor,
+      builder: (context, backgroundColor, child) {
+        return ValueListenableBuilder(
+          valueListenable: ThemeState.textColor,
+          builder: (context, textColor, child) {
+            return ValueListenableBuilder(
+              valueListenable: ThemeState.textSize,
+              builder: (context, textSize, child) {
+                return ValueListenableBuilder(
+                  valueListenable: ThemeState.fontIndex,
+                  builder: (context, fontIndex, child) {
+                    final fonts = ['Default', 'Serif', 'Monospace'];
+                    return WillPopScope(
+                      onWillPop: () async {
+                        // 뒤로가기 눌렀을 때 MainHomePage로 이동
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+                        );
+                        return false; // 기본 뒤로가기 동작 방지
+                      },
+                      child: Scaffold(
+                        appBar: CustomAppBar(
+                          title: 'Pill Check',
+                          onBackPressed: () {
+                            // 뒤로가기 버튼 눌렀을 때 MainHomePage로 이동
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+                            );
+                          },
+                        ),
+                        backgroundColor: backgroundColor,
+                        body: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const CircularProgressIndicator(), // 로딩 애니메이션 표시
+                              const SizedBox(height: 20),
+                              Text(
+                                '조금만 기다려주세요\n로딩 중입니다...',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: textSize,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                  fontFamily: fonts[fontIndex] == 'Default'
+                                      ? null
+                                      : fonts[fontIndex],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        bottomNavigationBar: CustomBottomBar(
+                          onHomePressed: () {
+                            // 홈 버튼 눌렀을 때 MainHomePage로 이동
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
         );
-        return false; // 기본 뒤로가기 동작 방지
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Pill Check'),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () {
-              // 뒤로가기 버튼 눌렀을 때 MainHomePage로 이동
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => MainHomePage(userId: widget.userId)),
-              );
-            },
-          ),
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(), // 로딩 애니메이션 표시
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () => _uploadAndAnalyzeImage(), // 업로드 및 분석 재시도
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // 버튼 색상
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                child: const Text('Retry Upload'), // 버튼 텍스트
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
