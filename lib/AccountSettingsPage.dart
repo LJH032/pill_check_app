@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'main_home.dart'; // MainHomePage import
 import 'entry_point.dart'; // ThemeState를 가져오기 위해 import
+import 'login.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:kakao_flutter_sdk/kakao_flutter_sdk_user.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   final String userId; // userId 필드 추가
@@ -15,6 +20,8 @@ class AccountSettingsPage extends StatefulWidget {
 class _AccountSettingsPageState extends State<AccountSettingsPage> {
   bool isAutoLoginEnabled = false; // 계정 자동 로그인 설정 여부
   bool isNotificationEnabled = false; // 알림 설정 여부
+
+  GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   void initState() {
@@ -34,6 +41,66 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isAutoLoginEnabled', isAutoLoginEnabled);
     await prefs.setBool('isNotificationEnabled', isNotificationEnabled);
+  }
+
+  Future<String?> fetchLoginType(String userId) async {
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:5000/logout'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['login_type']; // 'google' 또는 'kakao'
+    } else {
+      print('Failed to fetch login type: ${response.statusCode}');
+      return null;
+    }
+  }
+
+  Future<void> logout(String userId) async {
+    try {
+      // 서버로 로그아웃 요청 보내기
+      final response = await http.post(
+        Uri.parse('http://10.0.2.2:5000/logout'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'user_id': userId}),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['message'] == 'Google logout request') {
+          // 구글 로그아웃 처리
+          await googleLogout();
+        } else if (responseData['message'] == 'Kakao logout request') {
+          // 카카오 로그아웃 처리
+          await kakaoLogout();
+        }
+      } else {
+        print('로그아웃 처리 실패: ${response.body}');
+      }
+    } catch (e) {
+      print('Error during logout: $e');
+    }
+  }
+
+  Future<void> googleLogout() async {
+    try {
+      await _googleSignIn.signOut();
+      print('Google 로그아웃 성공');
+    } catch (e) {
+      print('구글 로그아웃 실패: $e');
+    }
+  }
+
+  Future<void> kakaoLogout() async {
+    try {
+      await UserApi.instance.logout();
+      print('카카오 로그아웃 성공');
+    } catch (e) {
+      print('카카오 로그아웃 실패: $e');
+    }
   }
 
   @override
@@ -86,52 +153,26 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   color: const Color(0xFFBDBDBD),
                   padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.centerLeft,
-                  child: ValueListenableBuilder(
-                    valueListenable: ThemeState.textColor,
-                    builder: (context, textColor, child) {
-                      return ValueListenableBuilder(
-                        valueListenable: ThemeState.textSize,
-                        builder: (context, textSize, child) {
-                          return ValueListenableBuilder(
-                            valueListenable: ThemeState.fontIndex,
-                            builder: (context, fontIndex, child) {
-                              final fonts = ['Default', 'Serif', 'Monospace'];
-                              return Text(
-                                '계정 설정 (User ID: ${widget.userId})', // userId 표시
-                                style: TextStyle(
-                                  fontFamily: fonts[fontIndex] == 'Default' ? null : fonts[fontIndex],
-                                  fontSize: textSize,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                  child: Text(
+                    '계정 설정 (User ID: ${widget.userId})', // userId 표시
+                    style: TextStyle(
+                      fontFamily: ['Default', 'Serif', 'Monospace'][ThemeState.fontIndex.value],
+                      fontSize: ThemeState.textSize.value,
+                      fontWeight: FontWeight.bold,
+                      color: ThemeState.textColor.value,
+                    ),
                   ),
                 ),
                 Expanded(
                   child: Column(
                     children: [
                       ListTile(
-                        title: ValueListenableBuilder(
-                          valueListenable: ThemeState.textSize,
-                          builder: (context, textSize, child) {
-                            return ValueListenableBuilder(
-                              valueListenable: ThemeState.textColor,
-                              builder: (context, textColor, child) {
-                                return Text(
-                                  '계정 자동 로그인',
-                                  style: TextStyle(
-                                    fontSize: textSize,
-                                    color: textColor,
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                        title: Text(
+                          '계정 자동 로그인',
+                          style: TextStyle(
+                            fontSize: ThemeState.textSize.value,
+                            color: ThemeState.textColor.value,
+                          ),
                         ),
                         trailing: Switch(
                           value: isAutoLoginEnabled,
@@ -144,22 +185,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                         ),
                       ),
                       ListTile(
-                        title: ValueListenableBuilder(
-                          valueListenable: ThemeState.textSize,
-                          builder: (context, textSize, child) {
-                            return ValueListenableBuilder(
-                              valueListenable: ThemeState.textColor,
-                              builder: (context, textColor, child) {
-                                return Text(
-                                  'Pill Check 알림 설정',
-                                  style: TextStyle(
-                                    fontSize: textSize,
-                                    color: textColor,
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                        title: Text(
+                          'Pill Check 알림 설정',
+                          style: TextStyle(
+                            fontSize: ThemeState.textSize.value,
+                            color: ThemeState.textColor.value,
+                          ),
                         ),
                         trailing: Switch(
                           value: isNotificationEnabled,
@@ -173,29 +204,30 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                       ),
                       const Spacer(),
                       ElevatedButton(
-                        onPressed: () {
-                          // 로그아웃 버튼 (UI만 존재)
+                        onPressed: () async {
+                          try {
+                            // 로그아웃 처리
+                            await logout(widget.userId); // userId는 사용자 ID를 전달
+
+                            // LoginHomePage로 이동
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginHomePage()),
+                            );
+                          } catch (e) {
+                            print('로그아웃 처리 중 오류 발생: $e');
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFE9E9E9),
                           padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 12.0),
                         ),
-                        child: ValueListenableBuilder(
-                          valueListenable: ThemeState.textSize,
-                          builder: (context, textSize, child) {
-                            return ValueListenableBuilder(
-                              valueListenable: ThemeState.textColor,
-                              builder: (context, textColor, child) {
-                                return Text(
-                                  '로그아웃',
-                                  style: TextStyle(
-                                    fontSize: textSize,
-                                    color: textColor,
-                                  ),
-                                );
-                              },
-                            );
-                          },
+                        child: Text(
+                          '로그아웃',
+                          style: TextStyle(
+                            fontSize: ThemeState.textSize.value,
+                            color: ThemeState.textColor.value,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -216,23 +248,13 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: ValueListenableBuilder(
-                    valueListenable: ThemeState.textColor,
-                    builder: (context, textColor, child) {
-                      return ValueListenableBuilder(
-                        valueListenable: ThemeState.textSize,
-                        builder: (context, textSize, child) {
-                          return Text(
-                            'version 1.0',
-                            style: TextStyle(
-                              fontSize: textSize * 0.8,
-                              fontStyle: FontStyle.italic,
-                              color: textColor,
-                            ),
-                          );
-                        },
-                      );
-                    },
+                  child: Text(
+                    'version 1.0',
+                    style: TextStyle(
+                      fontSize: ThemeState.textSize.value * 0.8,
+                      fontStyle: FontStyle.italic,
+                      color: ThemeState.textColor.value,
+                    ),
                   ),
                 ),
               ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:flutter_web_auth/flutter_web_auth.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart'; // Kakao SDK
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'main_home.dart';
@@ -85,66 +85,48 @@ class _LoginHomePageState extends State<LoginHomePage> {
   }
 
 
-  // Kakao 로그인
   Future<void> _loginWithKakao() async {
-    final url =
-        'https://kauth.kakao.com/oauth/authorize?client_id=baf21c9586cd52ac6c4211378fee4a17&redirect_uri=kakao%3Abaf21c9586cd52ac6c4211378fee4a17%3A%2F%2Foauth&response_type=code';
-
     try {
-      print('Kakao OAuth 요청 URL: $url');
-      final result = await FlutterWebAuth.authenticate(
-        url: url,
-        callbackUrlScheme: 'kakaobaf21c9586cd52ac6c4211378fee4a17', // Kakao 스킴 설정
+      // 카카오톡 설치 여부 확인
+      bool isKakaoInstalled = await isKakaoTalkInstalled();
+
+      // 카카오톡 앱 또는 카카오 계정 로그인 수행
+      OAuthToken token = isKakaoInstalled
+          ? await UserApi.instance.loginWithKakaoTalk() // 카카오톡 앱으로 로그인
+          : await UserApi.instance.loginWithKakaoAccount(); // 카카오 계정으로 로그인
+
+      print('Kakao 로그인 성공, 액세스 토큰: ${token.accessToken}');
+
+      // 사용자 정보 요청
+      User user = await UserApi.instance.me();
+      String email = user.kakaoAccount?.email ?? '';  // 이메일 정보를 가져옴
+
+      print('Kakao 사용자 정보: 이메일=$email, 닉네임=${user.kakaoAccount?.profile?.nickname}');
+
+      // 로그인 성공 후, DB에 정보 저장 (이메일을 사용하여 저장)
+      await _storeLoginInfoToDB(
+        userId: email,  // 구글과 마찬가지로 이메일을 userId로 사용
+        loginType: 'kakao',  // 로그인 타입은 카카오로 지정
+        accessToken: token.accessToken,  // 카카오 액세스 토큰
+        refreshToken: '',  // 카카오는 refreshToken을 사용할 수 없으므로 빈 문자열로 설정
       );
-      print('Kakao 인증 성공, 결과 URL: $result');
 
-      final code = Uri.parse(result).queryParameters['code'];
-      print('Kakao Authorization Code: $code');
-
-      final response = await http.post(
-        Uri.parse('https://kauth.kakao.com/oauth/token'),
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: {
-          'grant_type': 'authorization_code',
-          'client_id': 'baf21c9586cd52ac6c4211378fee4a17',
-          'client_secret': 'c27aba5f2eb37186820b4b6fc9f864a5',
-          'redirect_uri': 'kakao%3Abaf21c9586cd52ac6c4211378fee4a17%3A%2F%2Foauth',
-          'code': code!,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        print('Kakao OAuth 토큰 요청 성공: ${response.body}');
-        final responseBody = json.decode(response.body);
-        final accessToken = responseBody['access_token'];
-        print('Kakao Access Token: $accessToken');
-
-        await _storeLoginInfoToDB(
-          userId: 'kakao_user', // 카카오 사용자 ID는 'kakao_user'로 설정
-          loginType: 'kakao',
-          accessToken: accessToken,
-          refreshToken: responseBody['refresh_token'],
-        );
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kakao 로그인 성공!')),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-              builder: (context) => MainHomePage(userId: 'kakao_user')), // MainHomePage로 이동
-        );
-      } else {
-        print('Kakao OAuth 토큰 요청 실패: ${response.body}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Kakao 로그인 실패!')),
-        );
-      }
-    } catch (e) {
-      print('Kakao 인증 에러: $e');
+      // 로그인 성공 메시지
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Kakao 에러 발생: ${e.toString()}')),
+        const SnackBar(content: Text('Kakao 로그인 성공!')),
+      );
+
+      // 홈 페이지로 이동
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MainHomePage(userId: email),  // 이메일을 MainHomePage로 전달
+        ),
+      );
+    } catch (e) {
+      print('Kakao 로그인 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Kakao 로그인 실패: ${e.toString()}')),
       );
     }
   }
