@@ -28,7 +28,7 @@ class _LoadingPageState extends State<LoadingPage> {
   Future<void> _uploadAndAnalyzeImage() async {
     try {
       // Flask 서버에 이미지 업로드 및 분석 요청
-      var request = http.MultipartRequest('POST', Uri.parse('http://10.0.2.2:5000/predict'));
+      var request = http.MultipartRequest('POST', Uri.parse(''));
       request.files.add(await http.MultipartFile.fromPath('image', widget.imageFile.path));
       var response = await request.send();
 
