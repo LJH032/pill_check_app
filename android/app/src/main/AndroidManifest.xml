@@ -18,7 +18,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Kakao redirect_uri 스킴 설정 -->
                 <data
-                    android:scheme="kakaofe4182a212808903410b9c65cac7cf6d"
+                    android:scheme="kakao"
                     android:path="/oauth" />
             </intent-filter>
         </activity>
