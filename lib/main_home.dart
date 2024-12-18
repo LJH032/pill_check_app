@@ -25,7 +25,7 @@ class _MainHomePageState extends State<MainHomePage> {
 
   Future<void> _checkPermission(BuildContext context) async {
     try {
-      var response = await http.get(Uri.parse('http://10.0.2.2:5000/get_permission/${widget.userId}'));
+      var response = await http.get(Uri.parse(''));
 
       if (response.statusCode == 200) {
         var data = json.decode(response.body);
