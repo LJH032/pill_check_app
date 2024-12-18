@@ -45,7 +45,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   Future<String?> fetchLoginType(String userId) async {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:5000/logout'),
+      Uri.parse(''),
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({'user_id': userId}),
     );
@@ -63,7 +63,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     try {
       // 서버로 로그아웃 요청 보내기
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/logout'),
+        Uri.parse(''),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'user_id': userId}),
       );
