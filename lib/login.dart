@@ -24,7 +24,7 @@ class _LoginHomePageState extends State<LoginHomePage> {
     String? refreshToken,
   }) async {
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:5000/store-login-info'), // 서버의 로그인 정보 저장 API
+      Uri.parse(''), // 서버의 로그인 정보 저장 API
       headers: {
         'Content-Type': 'application/json',  // 헤더에서 Content-Type을 'application/json'으로 설정
       },
