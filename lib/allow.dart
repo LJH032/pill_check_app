@@ -10,7 +10,7 @@ class AllowPage extends StatelessWidget {
 
   Future<void> _requestPermission(BuildContext context) async {
     // 서버에서 현재 권한 상태 조회
-    var response = await http.get(Uri.parse('http://127.0.0.1:5000/get_permission/$userId'));
+    var response = await http.get(Uri.parse(''));
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
@@ -30,7 +30,7 @@ class AllowPage extends StatelessWidget {
     if (status.isGranted) {
       // 권한이 허용되었을 때 권한 상태를 서버에 저장
       await http.post(
-        Uri.parse('http://127.0.0.1:5000/update_permission'),
+        Uri.parse(''),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'user_id': userId,
@@ -44,7 +44,7 @@ class AllowPage extends StatelessWidget {
     } else if (status.isDenied || status.isPermanentlyDenied) {
       // 권한이 거부되었을 때 권한 상태를 서버에 저장
       await http.post(
-        Uri.parse('http://127.0.0.1:5000/update_permission'),
+        Uri.parse(''),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'user_id': userId,
@@ -64,7 +64,7 @@ class AllowPage extends StatelessWidget {
 
   Future<void> _checkAndRequestPermission(BuildContext context) async {
     // 서버에서 현재 권한 상태 조회
-    var response = await http.get(Uri.parse('http://127.0.0.1:5000/get_permission/$userId'));
+    var response = await http.get(Uri.parse(''));
 
     if (response.statusCode == 200) {
       var data = json.decode(response.body);
