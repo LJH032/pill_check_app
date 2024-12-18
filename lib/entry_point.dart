@@ -10,7 +10,7 @@ import 'result_page.dart';
 
 void main() {
   KakaoSdk.init(
-    nativeAppKey: "fe4182a212808903410b9c65cac7cf6d", // 카카오 네이티브 앱 키
+    nativeAppKey: "", // 카카오 네이티브 앱 키
     loggingEnabled: true, // 디버그용 로깅 활성화
   );
   runApp(const MyApp());
