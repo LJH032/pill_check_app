@@ -62,12 +62,6 @@ python app.py
 Database (MariaDB Docker)
 docker run --name pill-db -e MYSQL_ROOT_PASSWORD=your_pw -p 3306:3306 -d mariadb
 
-🎥 Demo
-
-(여기에 앱 실행 GIF / 스크린샷 삽입)
-예:
-
-
 📊 Results
 
 YOLOv5 mAP@0.5 : xx%
